@@ -16,5 +16,5 @@ interface ReminderDao{
     fun insert(reminder: Reminder)
 
     @Query("SELECT * FROM reminders")
-    fun getReminders() : List<Reminder>
+    fun getReminders(): List<Reminder>
 }
