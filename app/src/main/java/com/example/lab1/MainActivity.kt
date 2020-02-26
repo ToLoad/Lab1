@@ -1,12 +1,16 @@
 package com.example.lab1
 
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.AdapterView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.room.Room
 import kotlinx.android.synthetic.main.activity_main.*
@@ -49,6 +53,37 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // Not in Lab 6 Offline Class, but Lab 7 sudden appearance(list.onItemClickListener part)
+        list.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+            val selected = list.adapter.getItem(position) as Reminder
+
+            val builder = AlertDialog.Builder(this@MainActivity)
+            builder.setTitle("Delete reminder?")
+                .setMessage(selected.message)
+                .setPositiveButton("Delete") { _, _ ->
+
+                    if (selected.time != null) {
+                        val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                        val intent = Intent(this@MainActivity, ReminderReceiver::class.java)
+                        val pending = PendingIntent.getBroadcast(this@MainActivity, selected.uid!!, intent, PendingIntent.FLAG_ONE_SHOT)
+                        manager.cancel(pending)
+                    }
+
+                    doAsync {
+                        val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "reminder").build()
+                        db.reminderDao().delete(selected.uid!!)
+                        db.close()
+
+                        refreshList()
+                    }
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
+        // Lab 7 Disappear
         doAsync {
             val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "reminders").build()
             val reminders = db.reminderDao().getReminders()

@@ -21,7 +21,7 @@
             android:layout_height="match_parent"
             android:layout_weight="4"
             android:paddingLeft="10dp"
-            android:hint="Search ....."
+            android:hint="@string/search_location"
             />
 
         <androidx.appcompat.widget.AppCompatImageButton

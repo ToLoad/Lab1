@@ -60,7 +60,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             val reminder = Reminder(
                 uid = null,
                 time = null,
-                location = String.format("%.3f, %.3f",selectLocation.latitude,selectLocation.latitude),//"65.059640\n25.466246",
+                location = String.format("%.3f, %.3f",selectLocation.latitude,selectLocation.longitude),//"65.059640\n25.466246",
                 message = reminderText
             )
 

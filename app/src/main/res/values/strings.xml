@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Lab1</string>
+    <string name="search_location">Search the location.....</string>
 </resources>

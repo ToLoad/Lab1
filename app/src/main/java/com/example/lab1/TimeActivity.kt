@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.room.Room
 import kotlinx.android.synthetic.main.activity_time.*
 import org.jetbrains.anko.doAsync
@@ -28,6 +29,9 @@ class TimeActivity : AppCompatActivity() {
                 timePicker.currentMinute
             )
 
+            Log.d("LAB7", "picked year is " + datePicker.year)
+            Log.d("LAB7", "picked month is " + datePicker.month)
+
             if ((et_message.text.toString() != "") &&
                 (calendar.timeInMillis > System.currentTimeMillis())) {
 
@@ -40,10 +44,11 @@ class TimeActivity : AppCompatActivity() {
 
                 doAsync {
                     val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "reminders").build()
-                    db.reminderDao().insert(reminder)
+                    val uid = db.reminderDao().insert(reminder).toInt()
+
                     db.close()
 
-                    setAlarm(reminder.time!!, reminder.message)
+                    setAlarm(uid, calendar.timeInMillis, reminder.message)
 
                     finish()
                 }
@@ -53,14 +58,15 @@ class TimeActivity : AppCompatActivity() {
         }
     }
 
-    private fun setAlarm(time: Long, message: String) {
+    private fun setAlarm(uid: Int, time: Long, message: String) {
         val intent = Intent(this, ReminderReceiver::class.java)
+        intent.putExtra("uid", uid)
         intent.putExtra("message", message)
 
-        val pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_ONE_SHOT)
+        val pending = PendingIntent.getBroadcast(this, uid, intent, PendingIntent.FLAG_ONE_SHOT)
 
         val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        manager.setExact(AlarmManager.RTC, time, pendingIntent)
+        manager.setExact(AlarmManager.RTC, time, pending)
 
         runOnUiThread{toast("Reminder is created")}
     }
